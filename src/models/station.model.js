@@ -28,14 +28,25 @@ const stationSchema = new Schema(
       type: Boolean,
       default: true,
     },
-    icon: {
+    image: {
       type: String,
       required: true,
+    },
+    bgImage: {
+      type: String,
     },
     theme: {
       type: Schema.Types.ObjectId,
       ref: "Theme",
     },
+    font: {
+      type: Schema.Types.ObjectId,
+      ref: "Font",
+    },
+    createdByVisibility: {
+      type: Boolean,
+      required: true,
+    }
   },
   { timestamps: true }
 );
