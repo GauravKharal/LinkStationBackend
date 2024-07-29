@@ -32,16 +32,9 @@ const stationSchema = new Schema(
       type: String,
       required: true,
     },
-    bgImage: {
-      type: String,
-    },
     theme: {
       type: Schema.Types.ObjectId,
       ref: "Theme",
-    },
-    font: {
-      type: Schema.Types.ObjectId,
-      ref: "Font",
     },
     createdByVisibility: {
       type: Boolean,
