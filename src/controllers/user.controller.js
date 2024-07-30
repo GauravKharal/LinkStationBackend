@@ -212,13 +212,13 @@ const changePassword = asyncHandler(async (req, res) => {
 });
 
 const getUserDetails = asyncHandler(async (req, res) => {
-  return res.status(200).json(200, req.user, "User Fetched Successfully");
+  return res.status(200).json(new ApiResponse(200, req.user, "User Fetched Successfully"));
 });
 
 const updateUserDetails = asyncHandler(async (req, res) => {
   const { fullName, dateOfBirth } = req.body;
 
-  const user = User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
