@@ -32,10 +32,6 @@ const stationSchema = new Schema(
       type: String,
       required: true,
     },
-    theme: {
-      type: Schema.Types.ObjectId,
-      ref: "Theme",
-    },
     createdByVisibility: {
       type: Boolean,
       required: true,
