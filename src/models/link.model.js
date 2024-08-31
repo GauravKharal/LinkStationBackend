@@ -16,17 +16,14 @@ const linkSchema = new Schema(
     },
     image: {
       type: String,
+      required: true,
     },
     clicks: {
       type: Number,
-    },
-    color: {
-      type: String,
-      required: true,
+      default: 0,
     },
     position: {
       type: Number,
-      required: true,
     },
   },
   { timestamps: true }

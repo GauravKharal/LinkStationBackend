@@ -20,10 +20,6 @@ const stationSchema = new Schema(
     description: {
       type: String,
     },
-    views: {
-      type: Number,
-      default: 0,
-    },
     visibility: {
       type: Boolean,
       default: true,
@@ -32,9 +28,29 @@ const stationSchema = new Schema(
       type: String,
       required: true,
     },
-    createdByVisibility: {
-      type: Boolean,
-      required: true,
+    instagram: {
+      type: String,
+    },
+    twitter: {
+      type: String,
+    },
+    facebook: {
+      type: String,
+    },
+    youtube: {
+      type: String,
+    },
+    views:{
+      type: Number,
+      default: 0,
+    },
+    clicks:{
+      type: Number,
+      default: 0,
+    },
+    shares:{
+      type: Number,
+      default: 0,
     }
   },
   { timestamps: true }
