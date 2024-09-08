@@ -236,17 +236,25 @@ const getMostViewedStations = asyncHandler(async (req, res) => {
 
 const getViewsByDate = asyncHandler(async (req, res) => {
   const { days = 7 } = req.query;
-  const date = new Date();
-  date.setDate(date.getDate() - days);
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - days);
 
   // Fetch station IDs for the logged-in user
   const stationIds = await Station.find({ owner: req.user._id }).select("_id");
 
-  // Ensure stationIds are in an array of ObjectIds
   const stationIdsArray = stationIds.map((station) => station._id);
 
   if (!stationIdsArray.length) {
     throw new ApiError(404, "Stations not found");
+  }
+
+  // Generate a date range array for the last 'n' days
+  const dateRange = [];
+  for (let i = 0; i < days; i++) {
+    const date = new Date();
+    date.setDate(endDate.getDate() - i);
+    dateRange.push(date.toISOString().split('T')[0]); // Store date in YYYY-MM-DD format
   }
 
   // Aggregate views from StationView grouped by date
@@ -257,7 +265,8 @@ const getViewsByDate = asyncHandler(async (req, res) => {
           $in: stationIdsArray,
         },
         date: {
-          $gte: date,
+          $gte: startDate,
+          $lte: endDate,
         },
       },
     },
@@ -293,12 +302,22 @@ const getViewsByDate = asyncHandler(async (req, res) => {
     },
   ]);
 
-  
+  // Create a map of dates with total views
+  const viewsMap = data.reduce((acc, item) => {
+    const date = item.date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    acc[date] = item.totalViews;
+    return acc;
+  }, {});
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, data, "Views fetched successfully"));
+  // Build the final result with 0 views for missing days
+  const result = dateRange.map((date) => ({
+    date,
+    totalViews: viewsMap[date] || 0,
+  }));
+
+  return res.status(200).json(new ApiResponse(200, result, "Views fetched successfully"));
 });
+
 
 const searchStations = asyncHandler(async (req, res) => {
   const { query } = req.query;
