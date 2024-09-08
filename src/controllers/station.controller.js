@@ -251,7 +251,7 @@ const getViewsByDate = asyncHandler(async (req, res) => {
 
   // Generate a date range array starting from 'days' ago up to today
   const dateRange = [];
-  for (let i = 0; i < days; i--) {
+  for (let i = 0; i < days; i++) {
     const date = new Date();
     date.setDate(startDate.getDate() + i);
     dateRange.push(date.toISOString().split("T")[0]); // Store date in YYYY-MM-DD format
