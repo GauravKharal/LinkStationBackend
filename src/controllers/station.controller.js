@@ -249,9 +249,9 @@ const getViewsByDate = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Stations not found");
   }
 
-  // Generate a date range array for the last 'n' days
+  // Generate a date range array starting from 'days' ago up to today
   const dateRange = [];
-  for (let i = 0; i < days; i++) {
+  for (let i = days - 1; i >= 0; i--) {
     const date = new Date();
     date.setDate(endDate.getDate() - i);
     dateRange.push(date.toISOString().split('T')[0]); // Store date in YYYY-MM-DD format
@@ -309,7 +309,7 @@ const getViewsByDate = asyncHandler(async (req, res) => {
     return acc;
   }, {});
 
-  // Build the final result with 0 views for missing days
+  // Build the final result with 0 views for missing days, ordered from oldest to newest
   const result = dateRange.map((date) => ({
     date,
     totalViews: viewsMap[date] || 0,
@@ -317,6 +317,7 @@ const getViewsByDate = asyncHandler(async (req, res) => {
 
   return res.status(200).json(new ApiResponse(200, result, "Views fetched successfully"));
 });
+
 
 
 const searchStations = asyncHandler(async (req, res) => {
