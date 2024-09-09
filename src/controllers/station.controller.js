@@ -2,6 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Station } from "../models/station.model.js";
 import { StationView } from "../models/stationView.model.js";
+import { LinkClick } from "../models/linkClick.model.js";
+import { StationShare } from "../models/stationShare.model.js";
 import { Link } from "../models/link.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
@@ -263,10 +265,10 @@ const getViewsByDate = asyncHandler(async (req, res) => {
     },
     {
       $group: {
-        _id: { 
-          year: { $year: "$date" }, 
-          month: { $month: "$date" }, 
-          day: { $dayOfMonth: "$date" } 
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+          day: { $dayOfMonth: "$date" },
         },
         totalViews: { $sum: "$views" },
       },
@@ -292,8 +294,6 @@ const getViewsByDate = asyncHandler(async (req, res) => {
       },
     },
   ]);
-
-  
 
   return res
     .status(200)
@@ -356,7 +356,6 @@ const getMostPopularStationsThisWeek = asyncHandler(async (req, res) => {
     },
   ]);
 
-
   return res
     .status(200)
     .json(new ApiResponse(200, stationViews, "Stations fetched successfully"));
@@ -390,7 +389,8 @@ const getMyMostPopularStations = asyncHandler(async (req, res) => {
         foreignField: "_id",
         as: "station",
       },
-    },{
+    },
+    {
       $unwind: "$station",
     },
     {
@@ -414,6 +414,132 @@ const getMyMostPopularStations = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, stationViews, "Stations fetched successfully"));
 });
 
+const totalMonthlySummary = asyncHandler(async (req, res) => {
+  const date = new Date();
+  date.setDate(date.getDate() - 28);
+  const stationViews = await StationView.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: date,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+        totalViews: { $sum: "$views" },
+      },
+    },
+    {
+      $sort: {
+        "_id.year": 1,
+        "_id.month": 1,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalViews: { $sum: "$totalViews" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalViews: 1,
+      },
+    },
+  ]);
+
+  const stationClicks = await LinkClick.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: date,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+        totalClicks: { $sum: "$clicks" },
+      },
+    },
+    {
+      $sort: {
+        "_id.year": 1,
+        "_id.month": 1,
+      },
+    },{
+      $group: {
+        _id: null,
+        totalClicks: { $sum: "$totalClicks" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalClicks: 1,
+      },
+    },
+  ]);
+
+  const stationShares = await StationShare.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: date,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+        totalShares: { $sum: "$shares" },
+      },
+    },
+    {
+      $sort: {
+        "_id.year": 1,
+        "_id.month": 1,
+      },
+    },{
+      $group: {
+        _id: null,
+        totalShares: { $sum: "$totalShares" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalShares: 1,
+      },
+    },
+  ]);
+
+  const { totalViews} = stationViews[0] || 0;
+  const { totalClicks} = stationClicks[0] || 0;
+  const { totalShares} = stationShares[0] || 0;
+
+  const data = {
+    totalViews: totalViews,
+    totalClicks: totalClicks,
+    totalShares: totalShares,
+  };
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, data, "Stations fetched successfully"));
+});
 
 export {
   getStationPage,
@@ -423,5 +549,6 @@ export {
   getViewsByDate,
   searchStations,
   getMostPopularStationsThisWeek,
-  getMyMostPopularStations
+  getMyMostPopularStations,
+  totalMonthlySummary,
 };
