@@ -9,7 +9,8 @@ import {
   getViewsByDate,
   searchStations,
   getMostPopularStationsThisWeek,
-  getMyMostPopularStations
+  getMyMostPopularStations,
+  totalMonthlySummary,
 } from "../controllers/station.controller.js";
 
 const router = Router();
@@ -43,6 +44,8 @@ router.route("/search").get(searchStations);
 router.route("/popular-this-week").get(getMostPopularStationsThisWeek);
 
 router.route("/my-popular").get(verifyJWT, getMyMostPopularStations);
+
+router.route("/total-monthly-summary").get(verifyJWT, totalMonthlySummary);
 
 
 export default router;
