@@ -1,4 +1,5 @@
 import { Link } from "../models/link.model.js";
+import { Station } from "../models/station.model.js";
 import { LinkClick } from "../models/linkClick.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -43,6 +44,25 @@ const incrementClicks = asyncHandler(async (req, res) => {
 
   link.clicks = totalClicks;
   link.save();
+
+  const station = await Station.findById(link.station);
+  if (!station) {
+    throw new ApiError(404, "Station not found");
+  }
+
+  const links = await Link.find({ station: station._id });
+  if (!links?.length) {
+    throw new ApiError(404, "Links not found");
+  }
+
+  const stationClicks = links.reduce((total, link) => {
+    return total + link.clicks;
+  }, 0);
+
+  station.clicks = stationClicks;
+  station.save();
+
+
 
   return res
     .status(200)
