@@ -3,6 +3,6 @@ import { incrementClicks } from "../controllers/link.controller.js";
 
 const router = Router();
 
-router.route("/l/:linkId").get(incrementClicks);
+router.route("/l/click/:linkId").get(incrementClicks);
 
 export default router;

@@ -11,11 +11,15 @@ import {
   getMostPopularStationsThisWeek,
   getMyMostPopularStations,
   totalMonthlySummary,
+  incrementShares,
 } from "../controllers/station.controller.js";
 
 const router = Router();
 
 router.route("/s/:url").get(getStationPage);
+
+router.route("/s/share/:stationId").get(incrementShares);
+
 
 // Secure Routes (Require Users to be Logged In)
 router.route("/create").post(
@@ -28,7 +32,7 @@ router.route("/create").post(
     {
       name: "linkImages",
       maxCount: 10,
-    }
+    },
   ]),
   createStation
 );
@@ -46,6 +50,5 @@ router.route("/popular-this-week").get(getMostPopularStationsThisWeek);
 router.route("/my-popular").get(verifyJWT, getMyMostPopularStations);
 
 router.route("/total-monthly-summary").get(verifyJWT, totalMonthlySummary);
-
 
 export default router;

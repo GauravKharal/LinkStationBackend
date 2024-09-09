@@ -69,6 +69,40 @@ const getStationPage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, data, "Station fetched successfully"));
 });
 
+const incrementShares = asyncHandler(async (req, res) => {
+  const { stationId } = req.params;
+  const station = await Station.findById(stationId);
+  if (!station) {
+    throw new ApiError(404, "Station not found");
+  }
+
+  const stationShare = await StationShare.findOne({
+    station: stationId,
+    date: new Date().setHours(0, 0, 0, 0),
+  });
+  if (!stationShare) {
+    await StationShare.create({
+      station: stationId,
+      date: new Date().setHours(0, 0, 0, 0),
+      shares: 1,
+    });
+  } else {
+    await StationShare.findByIdAndUpdate(stationShare._id, {
+      $inc: { shares: 1 },
+    });
+  }
+
+  const stationShares = await StationShare.find({ station: stationId });
+
+  const totalShares = stationShares.reduce((total, stationShare) => {
+    return total + stationShare.shares;
+  }, 0);
+
+  station.shares = totalShares;
+  station.save();
+
+});
+
 const createStation = asyncHandler(async (req, res) => {
   // get station details from frontend
   // validation - (not empty)
@@ -551,4 +585,5 @@ export {
   getMostPopularStationsThisWeek,
   getMyMostPopularStations,
   totalMonthlySummary,
+  incrementShares,
 };
